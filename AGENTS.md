@@ -103,7 +103,7 @@ rm -rf mods/moe-office/scene && .venv/bin/python -I tools/scene_art.py mods/moe-
 - To swap one for a picture:
   - Draw a PNG with the same aspect ratio and put it in `mods/moe-office/scene/<theme>/`.
   - Change that entry's `src` to the new file name.
-- Things that turn around (only the cat so far) also need a mirrored `<name>_l.png`.
+- Things that turn around (only the cat so far) also need a mirrored `<name>_l.png`: Herdr can't flip an element when drawing it. `scene_art.py` writes the `_l.svg` only for art written with `turns=True`, and `S.art(..., flip)` picks it.
 - The clock hands are one file per angle in `scene/<theme>/clock/`: hour hand `h_0` to `h_47`, one per 15 minutes; minute hand `m_0` to `m_59`, one per minute.
 - Careful: `scene_art.py` deletes `mods/moe-office/scene` first, so keep your pictures somewhere else, or don't run it again after swapping.
 

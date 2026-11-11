@@ -68,11 +68,13 @@ LACE, LACE_HOLE = T.get("LACE", ("#ffffff", "#f6c4d5"))
 def s(fill, extra=""):
     return f'fill="{fill}" stroke="{INK}" stroke-width="{SW}" stroke-linejoin="round" stroke-linecap="round" {extra}'
 
-def write(name, w, h, body):
-    """<name>.svg faces right; <name>_l.svg is its mirror image, for things that turn around."""
+def write(name, w, h, body, turns=False):
+    """<name>.svg faces right. Things that turn around (turns=True, only the cat so far) also
+    get <name>_l.svg, their mirror image: Herdr can't flip an element when drawing it."""
     head = f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {w} {h}" width="{w * 8}" height="{h * 8}">'
     open(f"{OUT}/{name}.svg", "w").write(f"{head}{body}</svg>")
-    open(f"{OUT}/{name}_l.svg", "w").write(f'{head}<g transform="translate({w} 0) scale(-1 1)">{body}</g></svg>')
+    if turns:
+        open(f"{OUT}/{name}_l.svg", "w").write(f'{head}<g transform="translate({w} 0) scale(-1 1)">{body}</g></svg>')
 
 def heart(cx, cy, r, fill, stroke=True):
     d = (f"M{cx} {cy + r * 0.9} C{cx - r * 1.6} {cy - r * 0.1} {cx - r * 0.9} {cy - r * 1.3} {cx} {cy - r * 0.45} "
@@ -560,7 +562,7 @@ write("cat_sit", 14, 11, "".join([
     f'<ellipse cx="7.6" cy="8.4" rx="2" ry="2.1" fill="{BELLY}"/>',
     f'<ellipse cx="6.6" cy="10.5" rx="1.1" ry="0.55" {s(CAT3)}/>', f'<ellipse cx="9" cy="10.5" rx="1.1" ry="0.55" {s(CAT3)}/>',
     cat_head(8.2, 4.2),
-]))
+]), turns=True)
 write("cat_sleep", 14, 11, "".join([
     tail("M2.2 10.2 Q0.6 9.6 1.4 8"),
     f'<ellipse cx="6.6" cy="8.3" rx="5.8" ry="2.6" {s(CAT)}/>',
@@ -571,7 +573,7 @@ write("cat_sleep", 14, 11, "".join([
     f'<path d="M9.9 7.8 q0.45 0.35 0.9 0 M11.6 7.8 q0.45 0.35 0.9 0" fill="none" stroke="{INK}" stroke-width="0.24" stroke-linecap="round"/>',
     circ(12.9, 8.6, 0.4, PINK2, False),
     f'<ellipse cx="9" cy="10.4" rx="1.1" ry="0.5" {s(CAT3)}/>',
-]))
+]), turns=True)
 def cat_walk(k):
     legs = [(4.2, 0.5), (9, -0.5)] if k == 0 else [(4.2, -0.5), (9, 0.5)]
     return "".join([
@@ -583,8 +585,8 @@ def cat_walk(k):
         f'<ellipse cx="7" cy="8.9" rx="3.2" ry="1.1" fill="{BELLY}"/>',
         cat_head(10.6, 4.9),
     ])
-write("cat_walk_0", 14, 11, cat_walk(0))
-write("cat_walk_1", 14, 11, cat_walk(1))
+write("cat_walk_0", 14, 11, cat_walk(0), turns=True)
+write("cat_walk_1", 14, 11, cat_walk(1), turns=True)
 
 # interns: stool 9 x 7 (seat top at 7, like the chair) and a laptop on the lap 6 x 4
 write("stool", 9, 7, rect(0.4, 0.4, 8.2, 1.6, MINT2, 0.8) + rect(1.4, 2, 1, 4.8, CREAM2, 0.3) + rect(6.6, 2, 1, 4.8, CREAM2, 0.3))
