@@ -134,27 +134,32 @@ export function frameTick(most) {
   return t;
 }
 
-// One frame of character `who`, her three layers stacked, at scale U.
+// One frame of character `who`, her three layers stacked, at scale U. Each action is one sheet
+// per layer and facing (tools/pack_sheets.py): frames in a grid, `cols` across, `pad` px
+// apart. Her box shows one cell; changing frames only moves the sheets inside it, so nothing
+// new has to load (separate files per frame made her blink out on a slower Mac with many girls).
 function frame(who, name, i, face, U, colour) {
   const CHAR = CAST[who], a = CHAR.anim[name];
   const k = (STAND_U * U) / CHAR.stand;
   const W = a.w * k, H = a.h * k;
-  const f = `mods/moe-office/chars/${who}/${name}_${i}${face < 0 ? "_l" : ""}`;
-  const layer = (el) => el.absolute().left(0).top(0).w(W).h(H);
-  return div().absolute().w(W).h(H)
+  const pw = (a.w + CHAR.pad) * k, ph = (a.h + CHAR.pad) * k;
+  const rows = Math.ceil(a.n / a.cols);
+  const f = `mods/moe-office/chars/${who}/${name}${face < 0 ? "_l" : ""}`;
+  const layer = (el) => el.absolute().left(-(i % a.cols) * pw).top(-Math.floor(i / a.cols) * ph).w(a.cols * pw).h(rows * ph);
+  return div().absolute().w(W).h(H).overflow_hidden()
     .child(layer(image(`${f}.png`)))
     .child(layer(svg(`${f}_hair.svg`).text_color(colour)))
     .child(layer(image(`${f}_shade.png`)));
 }
 
-// Warming up: a frame drawn for the first time isn't there yet (its files are still loading),
-// so she blinks out for a moment. warmup() draws every frame once, a few per render, for
-// each character and scale that has been drawn; put it first in the scene, under everything
-// else, where it can't be seen. Once one is done it draws nothing more.
-const warm = new Map(); // "character scale" -> how many frames are done
-const ALL = Object.fromEntries(CHARACTERS.map((who) => [who, Object.entries(CAST[who].anim).flatMap(([name, a]) =>
-  Array.from({ length: a.n }, (_, i) => [[name, i, 1], [name, i, -1]]).flat())]));
-const WARM_BATCH = 24;
+// Warming up: a sheet drawn for the first time isn't there yet (its files are still loading),
+// so she blinks out for a moment. warmup() draws every sheet once (frame 0 of each action and
+// facing), a few per render, for each character and scale that has been drawn; put it first
+// in the scene, under everything else, where it can't be seen. Once one is done it draws
+// nothing more.
+const warm = new Map(); // "character scale" -> how many sheets are done
+const ALL = Object.fromEntries(CHARACTERS.map((who) => [who, Object.keys(CAST[who].anim).flatMap((name) => [[name, 0, 1], [name, 0, -1]])]));
+const WARM_BATCH = 6;
 
 export function warmup() {
   const out = [];

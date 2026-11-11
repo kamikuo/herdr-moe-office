@@ -49,8 +49,8 @@ The language is English, Traditional Chinese or Japanese for all text (board, bu
 
 - One mod, `mods/moe-office/` (`mod.json`: `{ "place": "none" }`), placed as a layout block: `{ "type": "block", "content": { "mod": "moe-office" }, "size": { "px": 250 }, "min": 170, "max": 520 }`. Optional `props`: `lang` (`en`, `zh-TW`, `ja`) and `scene` (`pastel`, `jirai`, `gothic`); the settings panel's choice wins.
 - `main.js`: the view. Reads `agents()`, `terminals()` (sub-agents by `parent`), `spaces()` (tab `working_since`), `panes()` (branch), `shared("space.colors")` / `shared("space.icons")` (the sidebar's space tiles), `settings().zoom`; calls `setAgentOrder`, `run("pane.focus", { pane })`, `run("terminal.peek", { terminal })`. Positions move with `.transition("left"/"top")`; bubbles use `.frames()` and `.loop()`. Redraws on a timer at the shortest frame time drawn (at most 110 ms).
-- `doll.js`: the girls. Each frame is three layers: a 256-colour PNG without the hair; the hair, eyes and one accessory as a mask (an SVG wrapping a PNG) drawn with `svg().text_color(colour)`; a black/white PNG for the hair's shading. Frames facing left are separate `_l` files. All frames are drawn once under the room first (24 per redraw) so they don't blink when first shown. Characters per agent are kept in localStorage (`moe-office.cast`).
-- `chars/<character>/`: the frames and `char.js` (frame counts, ms per frame, size, feet anchor, `pingpong` for idle), made by `tools/build_video.py` from two 10-second green-screen videos per character (image-to-video), with Real-ESRGAN, a chroma key and despill.
+- `doll.js`: the girls. Each frame is three layers: a 256-colour PNG without the hair; the hair, eyes and one accessory as a mask (an SVG wrapping a PNG) drawn with `svg().text_color(colour)`; a black/white PNG for the hair's shading. Each action is one sheet per layer (its frames in a grid); her box is clipped to one cell and the sheets move inside it, so changing frames loads nothing (one file per frame made girls blink out on an M1 with 8 or more of them). Facing left is a separate `_l` sheet. Every sheet is drawn once under the room first so it doesn't blink when first shown. Characters per agent are kept in localStorage (`moe-office.cast`).
+- `chars/<character>/`: the sheets and `char.js` (frame counts, ms per frame, size, feet anchor, `pingpong` for idle, `cols` and `pad` of the sheets), made by `tools/build_video.py` (then `tools/pack_sheets.py`) from two 10-second green-screen videos per character (image-to-video), with Real-ESRGAN, a chroma key and despill.
 - `scene.js` + `scene/<theme>/`: every furniture piece as an SVG in scene units (`ART` table), made by `tools/scene_art.py`; walls, wainscot, floor colours, screens, board and signs are divs. Clock hands are one SVG per angle.
 - `i18n.js`: every on-screen string in three languages. `debug.js`: the settings panel, saved in localStorage (`moe-office.debug`).
 - No programs run and nothing goes online.
@@ -65,7 +65,7 @@ The language is English, Traditional Chinese or Japanese for all text (board, bu
 - Backgrounds must stay low-contrast and apart from the furniture's tone, or a busy scene becomes unreadable.
 - Hair recolouring needs the hair to be one hue (pink 335 to 351 degrees) that appears nowhere else on her except things meant to change with it; nothing green on the girls (green screen).
 - The mod's asset paths are written as `mods/moe-office/…`; rename them if the folder is renamed.
-- Files: about 4 to 6 MB per character.
+- Files: about 3 to 4 MB per character, 36 files.
 
 ## Done when
 
